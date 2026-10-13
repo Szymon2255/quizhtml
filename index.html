@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz HTML i CSS</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-color: #f8fafc;
+            --text-muted: #94a3b8;
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+            --accent: #10b981;
+            --danger: #ef4444;
+            --border: #334155;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+        }
+
+        .quiz-container {
+            background-color: var(--card-bg);
+            width: 100%;
+            max-width: 600px;
+            border-radius: 1rem;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+            padding: 2rem;
+            border: 1px solid var(--border);
+        }
+
+        .quiz-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 1rem;
+        }
+
+        .question-counter {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .score-badge {
+            background-color: var(--border);
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .question-text {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            line-height: 1.4;
+        }
+
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .option-btn {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            border: 1px solid var(--border);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            text-align: left;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .option-btn:hover:not(:disabled) {
+            background-color: var(--border);
+            border-color: var(--primary);
+        }
+
+        .option-btn.correct {
+            background-color: rgba(16, 185, 129, 0.2);
+            border-color: var(--accent);
+            color: #d1fae5;
+        }
+
+        .option-btn.incorrect {
+            background-color: rgba(239, 68, 68, 0.2);
+            border-color: var(--danger);
+            color: #fee2e2;
+        }
+
+        .action-btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            width: 100%;
+            padding: 0.85rem;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .action-btn:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .results-screen {
+            text-align: center;
+        }
+
+        .results-screen h2 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .results-score {
+            font-size: 3rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .results-grade {
+            font-size: 1.25rem;
+            margin-bottom: 2rem;
+            color: var(--text-muted);
+        }
+
+        .results-grade span {
+            color: var(--text-color);
+            font-weight: bold;
+            font-size: 1.5rem;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="quiz-container">
+        <!-- Ekran Quizu -->
+        <div id="quiz-screen">
+            <div class="quiz-header">
+                <span class="question-counter" id="question-counter">Pytanie 1/10</span>
+                <span class="score-badge" id="category-badge">HTML / CSS</span>
+            </div>
+            <div class="question-text" id="question-text">Treść pytania pojawi się tutaj...</div>
+            <div class="options-list" id="options-list">
+                <!-- Przyciski odpowiedzi -->
+            </div>
+        </div>
+
+        <!-- Ekran Wyników -->
+        <div id="results-screen" class="results-screen hidden">
+            <h2>Koniec Quizu!</h2>
+            <div class="results-score" id="final-score">0 / 10</div>
+            <div class="results-grade">Twoja ocena: <span id="final-grade">1</span></div>
+            <button class="action-btn" id="restart-btn">Zagraj ponownie</button>
+        </div>
+    </div>
+
+    <script>
+        const questionsPool = [
+            // HTML (15 pytań)
+            { q: "Co oznacza skrót HTML?", options: ["Hyper Text Markup Language", "High Tech Modern Language", "Hyper Transfer Markdown Logic", "Home Tool Markup Language"], a: 0, cat: "HTML" },
+            { q: "Który znacznik służy do stworzenia hiperłącza?", options: ["<link>", "<a>", "<href>", "<url>"], a: 1, cat: "HTML" },
+            { q: "Jaki znacznik definiuje największy nagłówek?", options: ["<h6>", "<head>", "<h1>", "<header>"], a: 2, cat: "HTML" },
+            { q: "Który znacznik służy do wstawienia obrazka?", options: ["<image>", "<img>", "<pic>", "<src>"], a: 1, cat: "HTML" },
+            { q: "Jak stworzyć listę uporządkowaną (numerowaną)?", options: ["<ul>", "<list>", "<ol>", "<dl>"], a: 2, cat: "HTML" },
+            { q: "Jaki znacznik tworzy nową linię w tekście?", options: ["<lb>", "<br>", "<break>", "<newline>"], a: 1, cat: "HTML" },
+            { q: "Który element służy do stworzenia tabeli?", options: ["<tab>", "<table>", "<tbl>", "<grid>"], a: 1, cat: "HTML" },
+            { q: "Jaki atrybut określa adres docelowy w hiperłączu?", options: ["src", "link", "href", "target"], a: 2, cat: "HTML" },
+            { q: "Który znacznik jest używany do tworzenia formularza?", options: ["<form>", "<input>", "<fieldset>", "<submit>"], a: 0, cat: "HTML" },
+            { q: "Który znacznik służy do semantycznego pogrubienia tekstu?", options: ["<bold>", "<b>", "<strong>", "<emp>"], a: 2, cat: "HTML" },
+            { q: "Który element oznacza stopkę strony?", options: ["<bottom>", "<section>", "<footer>", "<end>"], a: 2, cat: "HTML" },
+            { q: "Jakie pole tekstowe w formularzu jednowierszowe definiujemy znacznikiem?", options: ["<textarea>", "<input>", "<text>", "<field>"], a: 1, cat: "HTML" },
+            { q: "Który element reprezentuje główną treść dokumentu?", options: ["<body>", "<main>", "<content>", "<section>"], a: 1, cat: "HTML" },
+            { q: "Który znacznik służy do osadzania wideo w HTML5?", options: ["<media>", "<movie>", "<video>", "<player>"], a: 2, cat: "HTML" },
+            { q: "Jaki znacznik definiuje standardową komórkę tabeli?", options: ["<th>", "<td>", "<tr>", "<tc>"], a: 1, cat: "HTML" },
+            
+            // CSS (10 pytań)
+            { q: "Co oznacza skrót CSS?", options: ["Colorful Style Sheets", "Computer Style Sheets", "Cascading Style Sheets", "Creative Style System"], a: 2, cat: "CSS" },
+            { q: "Jakiej właściwości używa się do zmiany koloru tekstu?", options: ["text-color", "color", "font-color", "foreground"], a: 1, cat: "CSS" },
+            { q: "Która właściwość zmienia kolor tła elementu?", options: ["bg-color", "color-background", "background-color", "background"], a: 2, cat: "CSS" },
+            { q: "Jak odwołać się w CSS do elementu o ID 'header'?", options: [".header", "#header", "header", "*header"], a: 1, cat: "CSS" },
+            { q: "Jak odwołać się do elementów o klasie 'menu'?", options: [".menu", "#menu", "menu", "@menu"], a: 0, cat: "CSS" },
+            { q: "Która właściwość odpowiada za margines wewnętrzny?", options: ["spacing", "padding", "margin", "border-space"], a: 1, cat: "CSS" },
+            { q: "Która właściwość odpowiada za margines zewnętrzny?", options: ["padding", "spacing", "margin", "outside"], a: 2, cat: "CSS" },
+            { q: "Jak ustawić pogrubienie czcionki w CSS?", options: ["font-weight", "text-style", "bold", "font-bold"], a: 0, cat: "CSS" },
+            { q: "Która wartość właściwości 'display' tworzy układ siatki?", options: ["flex", "block", "grid", "table"], a: 2, cat: "CSS" },
+            { q: "Jak zmienić typ wskaźnika myszy na 'łapkę' (link)?options", options: ["cursor: hand;", "pointer: true;", "cursor: pointer;", "mouse: link;"], a: 2, cat: "CSS" }
+        ];
+
+        let currentQuestions = [];
+        let
