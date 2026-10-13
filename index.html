@@ -213,8 +213,96 @@
             { q: "Która właściwość odpowiada za margines zewnętrzny?", options: ["padding", "spacing", "margin", "outside"], a: 2, cat: "CSS" },
             { q: "Jak ustawić pogrubienie czcionki w CSS?", options: ["font-weight", "text-style", "bold", "font-bold"], a: 0, cat: "CSS" },
             { q: "Która wartość właściwości 'display' tworzy układ siatki?", options: ["flex", "block", "grid", "table"], a: 2, cat: "CSS" },
-            { q: "Jak zmienić typ wskaźnika myszy na 'łapkę' (link)?options", options: ["cursor: hand;", "pointer: true;", "cursor: pointer;", "mouse: link;"], a: 2, cat: "CSS" }
+            { q: "Jak zmienić typ wskaźnika myszy na 'łapkę' (link)?", options: ["cursor: hand;", "pointer: true;", "cursor: pointer;", "mouse: link;"], a: 2, cat: "CSS" }
         ];
 
         let currentQuestions = [];
-        let
+        let currentIndex = 0;
+        let score = 0;
+        let isAnswered = false;
+
+        const quizScreen = document.getElementById("quiz-screen");
+        const resultsScreen = document.getElementById("results-screen");
+        const questionCounter = document.getElementById("question-counter");
+        const categoryBadge = document.getElementById("category-badge");
+        const questionText = document.getElementById("question-text");
+        const optionsList = document.getElementById("options-list");
+        const finalScore = document.getElementById("final-score");
+        const finalGrade = document.getElementById("final-grade");
+        const restartBtn = document.getElementById("restart-btn");
+
+        function startQuiz() {
+            currentQuestions = [...questionsPool].sort(() => 0.5 - Math.random()).slice(0, 10);
+            currentIndex = 0;
+            score = 0;
+            quizScreen.classList.remove("hidden");
+            resultsScreen.classList.add("hidden");
+            showQuestion();
+        }
+
+        function showQuestion() {
+            isAnswered = false;
+            const q = currentQuestions[currentIndex];
+            questionCounter.textContent = `Pytanie ${currentIndex + 1}/10`;
+            categoryBadge.textContent = q.cat;
+            questionText.textContent = q.q;
+            optionsList.innerHTML = "";
+
+            q.options.forEach((opt, index) => {
+                const btn = document.createElement("button");
+                btn.className = "option-btn";
+                btn.textContent = `${String.fromCharCode(65 + index)}. ${opt}`;
+                btn.addEventListener("click", () => selectOption(index, btn));
+                optionsList.appendChild(btn);
+            });
+        }
+
+        function selectOption(selectedIndex, selectedBtn) {
+            if (isAnswered) return;
+            isAnswered = true;
+
+            const q = currentQuestions[currentIndex];
+            const buttons = optionsList.children;
+
+            if (selectedIndex === q.a) {
+                selectedBtn.classList.add("correct");
+                score++;
+            } else {
+                selectedBtn.classList.add("incorrect");
+                buttons[q.a].classList.add("correct");
+            }
+
+            Array.from(buttons).forEach(btn => btn.disabled = true);
+
+            setTimeout(() => {
+                currentIndex++;
+                if (currentIndex < currentQuestions.length) {
+                    showQuestion();
+                } else {
+                    showResults();
+                }
+            }, 1000);
+        }
+
+        function getGrade(pts) {
+            if (pts <= 4) return 1;
+            if (pts === 5) return 2;
+            if (pts === 6) return 3;
+            if (pts <= 8) return 4;
+            if (pts === 9) return 5;
+            return 6;
+        }
+
+        function showResults() {
+            quizScreen.classList.add("hidden");
+            resultsScreen.classList.remove("hidden");
+            finalScore.textContent = `${score} / 10`;
+            finalGrade.textContent = getGrade(score);
+        }
+
+        restartBtn.addEventListener("click", startQuiz);
+
+        startQuiz();
+    </script>
+</body>
+</html>
